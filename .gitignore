@@ -1,0 +1,107 @@
+# ------------------------------------------
+# PowerShell Modul .gitignore für MRCache
+# ------------------------------------------
+
+# Ignoriere alle Cache-Verzeichnisse, die vom Modul erzeugt werden
+*.mrcache/
+.mrcache/
+**/.mrcache/
+
+# Export-Clixml / Cache Files
+*.xml
+
+# Lokale PowerShell-Dateien
+*.pshistory
+*.psreadline
+ConsoleHost_history.txt
+
+# Build- und Release-Artefakte
+*.nupkg
+*.zip
+*.bak
+*.tmp
+
+# PowerShell Gallery Publish Artefakte
+*.publishsettings
+
+# Logs
+*.log
+*.trace
+*.err
+*.out
+
+# Private Settings
+*.Secrets.json
+*.config
+*.env
+
+# ------------------------------
+# Visual Studio Code
+# ------------------------------
+.vscode/
+.history/
+*.code-workspace
+
+# ------------------------------
+# Windows Dateien
+# ------------------------------
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# ------------------------------
+# macOS Dateien
+# ------------------------------
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Symbolic Link Metadata
+._*
+
+# ------------------------------
+# Linux Dateien
+# ------------------------------
+*~
+.nfs*
+
+# ------------------------------
+# Git intern
+# ------------------------------
+.gitignore~
+*.orig
+
+# ------------------------------
+# Test / Coverage Tools
+# ------------------------------
+coverage/
+*.coverage
+*.coveragexml
+.TestResults/
+*.trx
+
+# ------------------------------
+# Optional: Ignoriere Example-Ausgaben
+# ------------------------------
+examples/output/
+examples/*.csv
+examples/*.json
+
+# ------------------------------
+# Ignore Packaging Folder
+# ------------------------------
+dist/
+build/
+artifacts/
+
+# ------------------------------
+# Temporary folders used by editors/tools
+# ------------------------------
+.idea/
+.gradle/
+.svn/
+*.swp
+
+# ------------------------------------------
+# End of file
+# ------------------------------------------
