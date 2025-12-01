@@ -2,7 +2,7 @@ Clear-Host
 
 $sw = [System.Diagnostics.Stopwatch]::StartNew()
 
-Import-Module './Use-MRCache.psm1' -Force
+Import-Module './MRCache.psm1' -Force
 
 $computers = Use-MRCache -Verbose -ScriptBlock {
     Get-ADComputer -Filter { (Operatingsystem -like "Windows 11*") -and (Enabled -eq $true) } -Properties Name,Operatingsystem,Enabled |
