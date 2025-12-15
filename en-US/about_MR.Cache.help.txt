@@ -1,0 +1,42 @@
+TOPIC
+    about_MR.Cache
+
+SYNOPSIS
+    ScriptBlock-based cache with TTL, statistics and hash indexing.
+
+LONG DESCRIPTION
+    MR.Cache provides a lightweight, ScriptBlock-based caching mechanism
+    for PowerShell. Results of ScriptBlocks are cached under a defined key
+    and can be reused until their time-to-live (TTL) expires.
+
+    The module is designed to improve performance for expensive or repetitive
+    operations, such as network queries, directory lookups, or API calls.
+
+COMMANDS
+    Use-MRCache
+        Executes a ScriptBlock using the cache. Returns cached results
+        when available, otherwise computes and stores the result.
+
+    Clear-MRCache
+        Removes entries from the cache. Optionally clears a specific key.
+
+    Get-MRCacheStats
+        Returns cache statistics such as hits, misses and entry count.
+
+EXAMPLES
+    Import the module:
+
+        Import-Module MR.Cache
+
+    Cache a value with a TTL of 30 seconds:
+
+        Use-MRCache -Key 'DhcpLeases' -TtlSeconds 30 -ScriptBlock { Get-Data }
+
+    Clear the entire cache:
+
+        Clear-MRCache
+
+SEE ALSO
+    Use-MRCache
+    Clear-MRCache
+    Get-MRCacheStats

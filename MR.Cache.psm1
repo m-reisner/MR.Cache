@@ -2,23 +2,7 @@
 
 $script:MRCacheIndexFileName = 'mrcache.xml'
 
-<#
-Kurze Beschreibung
-
-Konvertiert TTL-Angaben in eine TimeSpan.
-
-Ausführliche Beschreibung
-
-Unterstützt TTL-Werte als:
-
-"hh:mm:ss" (empfohlene Form)
-
-TimeSpan
-
-int (interpretiert als Minuten)
-
-Bei ungültigen Formaten wird ein präziser Fehler ausgelöst.
-#>
+#.EXTERNALHELP MR.Cache.psm1-help.xml
 function ConvertTo-MRTimeSpan {
     [CmdletBinding()]
     param(
@@ -52,18 +36,7 @@ function ConvertTo-MRTimeSpan {
     throw "TTL-Typ '$($Ttl.GetType().FullName)' wird nicht unterstützt. Erlaubt sind: [TimeSpan], [int] (Minuten), [string] im Format 'hh:mm:ss'."
 }
 
-<#
-Kurze Beschreibung
-
-Ermittelt den Pfad des Scripts, das Use-MRCache aufruft.
-
-Ausführliche Beschreibung
-
-Analysiert den CallStack und liefert den ersten gültigen Skriptpfad, der nicht Teil eines Moduls ist.
-Wenn kein Script gefunden wird (z. B. interaktive Konsole), wird null zurückgegeben.
-
-Damit wird der Cache automatisch in der .mrcache-Struktur des aufrufenden Scripts gespeichert.
-#>
+#.EXTERNALHELP MR.Cache.psm1-help.xml
 function Get-MRCallerScriptPath {
     [CmdletBinding()]
     param()
@@ -85,16 +58,7 @@ function Get-MRCallerScriptPath {
     return $null
 }
 
-<#
-Kurze Beschreibung
-
-Bestimmt den Speicherort des Cache-Verzeichnisses.
-
-Ausführliche Beschreibung
-
-Ermittelt basierend auf Script-Pfad, optionalem -CachePath oder dem aktuellen Arbeitsverzeichnis den Ort, an dem Cache-Dateien abgelegt werden sollen.
-Falls das .mrcache-Verzeichnis nicht existiert, wird es automatisch erstellt.
-#>
+#.EXTERNALHELP MR.Cache.psm1-help.xml
 function Get-MRCachePath {
     [CmdletBinding()]
     param(
@@ -143,16 +107,7 @@ function Get-MRCachePath {
     return $cacheFolder
 }
 
-<#
-Kurze Beschreibung
-
-Liest die Indexdatei für einen Cache ein.
-
-Ausführliche Beschreibung
-
-Lädt die Datei mrcache.xml aus dem Cache-Ordner.
-Bei fehlender oder beschädigter Datei wird ein leerer Index erzeugt.
-#>
+#.EXTERNALHELP MR.Cache.psm1-help.xml
 function Get-MRCacheIndex {
     [CmdletBinding()]
     param(
@@ -179,16 +134,7 @@ function Get-MRCacheIndex {
     return $index
 }
 
-<#
-Kurze Beschreibung
-
-Speichert den aktuellen Cache-Index.
-
-Ausführliche Beschreibung
-
-Schreibt die hashtable-basierte Indexstruktur mittels Export-Clixml in die Datei mrcache.xml.
-Wird nach jeder Cache-Änderung aufgerufen.
-#>
+#.EXTERNALHELP MR.Cache.psm1-help.xml
 function Save-MRCacheIndex {
     [CmdletBinding()]
     param(
@@ -203,16 +149,7 @@ function Save-MRCacheIndex {
     $Index | Export-Clixml -Path $indexPath -Force
 }
 
-<#
-Kurze Beschreibung
-
-Berechnet einen Hash für den ScriptBlock-Inhalt.
-
-Ausführliche Beschreibung
-
-Normalisiert den ScriptBlock-Text, erzeugt ein SHA256-Hash und gibt ihn als kleingeschriebene Hex-Zeichenkette zurück.
-Dieser Hash definiert die Cache-Datei eindeutig.
-#>
+#.EXTERNALHELP MR.Cache.psm1-help.xml
 function Get-MRCacheHash {
     [CmdletBinding()]
     param(
@@ -233,24 +170,7 @@ function Get-MRCacheHash {
     return $hashLower
 }
 
-<#
-Kurze Beschreibung
-
-Entfernt automatisch abgelaufene Cache-Einträge.
-
-Ausführliche Beschreibung
-
-Clear-MRCacheExpired wird intern durch Use-MRCache aufgerufen, um Cache-Dateien zu entfernen, deren TTL abgelaufen ist.
-Die Funktion liest den Cache-Index, prüft die Ablaufzeiten und löscht alle Dateien, deren Expires-Zeitpunkt in der Vergangenheit liegt.
-
-Der Index wird danach automatisch aktualisiert.
-
-Hinweise
-
-Diese Funktion ist nicht für die direkte Verwendung durch Anwender gedacht.
-
-Sie wird automatisch ausgeführt, wenn Use-MRCache aufgerufen wird.
-#>
+#.EXTERNALHELP MR.Cache.psm1-help.xml
 function Clear-MRCacheExpired {
     [CmdletBinding()]
     param(
@@ -294,105 +214,7 @@ function Clear-MRCacheExpired {
     }
 }
 
-# Ende Hilfsfunktionen
-<#
-Kurze Beschreibung
-
-Führt einen ScriptBlock aus und speichert das Ergebnis für spätere Aufrufe, um wiederholte teure Abfragen zu vermeiden.
-
-Ausführliche Beschreibung
-
-Use-MRCache führt einen angegebenen ScriptBlock aus und speichert dessen Ergebnis in einer Cache-Datei innerhalb des .mrcache-Ordners des aufrufenden Skripts.
-Beim nächsten Aufruf mit identischem ScriptBlock wird der Cache anhand eines SHA256-Hashes erkannt und – sofern die TTL noch gültig ist – das gespeicherte Ergebnis zurückgegeben, ohne den ScriptBlock erneut auszuführen.
-
-Die Funktion erstellt zusätzlich einen Index mit Ablaufzeiten, Laufzeitstatistiken, Hit-Zählern und kumulierter Zeitersparnis.
-Damit lassen sich aufwendige AD-Abfragen oder große Datenabzüge beim Entwickeln erheblich beschleunigen.
-
-Wichtigste Funktionen
-
-Hash-basierter ScriptBlock-Fingerprint
-
-Cache-Dateien pro Script automatisch getrennt
-
-TTL-Überwachung
-
-Statistik: ExecutionTime, HitCount, TotalSavedMs
-
-Verbose-Ausgabe für Analyse der Cache-Nutzung
-
-Parameterbeschreibung
-
--ScriptBlock (erforderlich)
-Der auszuführende Code, dessen Ergebnis gecacht werden soll.
-
--Ttl (optional, Standard „00:30:00“)
-Gültigkeitsdauer im Format hh:mm:ss oder als TimeSpan/int.
-
--CachePath (optional)
-Optionaler Pfad für den Cache, ansonsten automatisch .mrcache im Script-Ordner.
-
--ForceRefresh
-Ignoriert vorhandene Cache-Dateien und führt den ScriptBlock neu aus.
-
--Verbose
-Zeigt detaillierte Statusmeldungen, inkl. Zeitersparnis.
-#>
-<#
-.SYNOPSIS
-Führt einen ScriptBlock aus und speichert dessen Ergebnis im Cache.
-
-.DESCRIPTION
-Use-MRCache führt den angegebenen ScriptBlock aus und speichert das Ergebnis
-in einer Cache-Datei im .mrcache-Ordner des aufrufenden Skripts.
-
-Beim nächsten Aufruf mit identischem ScriptBlock wird das Ergebnis anhand
-eines Hash-Wertes aus der Cache-Datei geladen, sofern die TTL noch gültig ist.
-Dies spart Ausführungszeit bei wiederholten, ressourcenintensiven Abfragen.
-
-Die Funktion erfasst zusätzlich statistische Werte wie:
-- LastExecutionMs (letzte echte Laufzeit)
-- HitCount       (Anzahl Cache-Treffer)
-- TotalSavedMs   (gesamt eingesparte Zeit)
-
-.PARAMETER ScriptBlock
-Der auszuführende PowerShell-Code, dessen Ergebnis gecacht werden soll.
-
-.PARAMETER Ttl
-Gültigkeitsdauer des Cache-Eintrags im Format hh:mm:ss.
-Akzeptiert auch TimeSpan oder int (Minuten).
-Standard: 00:30:00
-
-.PARAMETER CachePath
-Optionaler benutzerdefinierter Pfad für den Cache.
-Standard: .mrcache im Ordner des aufrufenden Skripts.
-
-.PARAMETER ForceRefresh
-Ignoriert vorhandene Cache-Dateien und führt den ScriptBlock neu aus.
-
-.EXAMPLE
-Use-MRCache -Ttl "00:30:00" -ScriptBlock {
-    Get-ADUser -Filter * -Properties SamAccountName
-}
-
-Lädt die Daten aus dem Cache, falls vorhanden und gültig.
-Andernfalls wird die Abfrage ausgeführt und das Ergebnis gespeichert.
-
-.EXAMPLE
-Use-MRCache -ForceRefresh -ScriptBlock {
-    Get-ADComputer -Filter *
-}
-
-Erzwingt die Neubefüllung des Cache-Eintrags.
-
-.OUTPUTS
-Gibt das Ergebnis des ScriptBlocks zurück, entweder live ausgeführt
-oder aus dem Cache.
-
-.NOTES
-Autor: m-reisner
-Modul: MRCache
-#>
-
+#.EXTERNALHELP MR.Cache.psm1-help.xml
 function Use-MRCache {
     [CmdletBinding()]
     param(
@@ -566,48 +388,7 @@ function Use-MRCache {
     return $result
 }
 
-<#
-.SYNOPSIS
-Löscht Cache-Dateien vollständig oder selektiv.
-
-.DESCRIPTION
-Clear-MRCache ermöglicht das Entfernen von Cache-Dateien im .mrcache-Ordner
-des aufrufenden Skripts oder eines angegebenen Skripts.
-
-- Mit -All wird der gesamte Cache-Ordner gelöscht.
-- Mit -ScriptPath werden nur die Cache-Dateien entfernt, die durch
-  Use-MRCache im angegebenen Skript verwendet wurden.
-
-Der Cache-Index wird automatisch aktualisiert.
-
-.PARAMETER All
-Löscht den kompletten Cache-Ordner für das aktuelle Skript bzw. den angegebenen CachePath.
-
-.PARAMETER ScriptPath
-Pfad zu einem PowerShell-Skript.
-Es werden nur die Cache-Dateien gelöscht, die von Use-MRCache innerhalb
-dieses Skripts verwendet werden.
-
-.PARAMETER CachePath
-Optional: benutzerdefinierter Cache-Speicherort.
-
-.EXAMPLE
-Clear-MRCache -All
-
-Löscht den gesamten Cache des aktuellen Skripts.
-
-.EXAMPLE
-Clear-MRCache -ScriptPath "C:\Scripts\MeinScript.ps1"
-
-Bereinigt nur die Cache-Einträge, die in MeinScript.ps1 verwendet werden.
-
-.OUTPUTS
-Kein Rückgabewert.
-
-.NOTES
-Autor: m-reisner
-Modul: MRCache
-#>
+#.EXTERNALHELP MR.Cache.psm1-help.xml
 function Clear-MRCache {
     [CmdletBinding(DefaultParameterSetName = 'All')]
     param(
@@ -752,30 +533,7 @@ function Clear-MRCache {
     Save-MRCacheIndex -Index $index -CachePath $CachePathResolved
 }
 
-<#
-.SYNOPSIS
-Zeigt Statistiken zu den Cache-Einträgen an.
-
-.DESCRIPTION
-Liest den Cache-Index mrcache.xml und gibt pro Eintrag ein Objekt mit
-Hash, Created, Expires, HitCount, LastExecutionMs und TotalSavedMs zurück.
-
-.PARAMETER CachePath
-Optional: benutzerdefinierter Cache-Speicherort.
-
-.EXAMPLE
-Get-MRCacheStats
-
-Gibt alle Cache-Einträge des aktuellen Skripts zurück.
-
-.EXAMPLE
-Get-MRCacheStats -CachePath "C:\Temp\CustomCache"
-
-Liest den Cache-Index aus einem benutzerdefinierten Ordner.
-
-.OUTPUTS
-[pscustomobject]
-#>
+#.EXTERNALHELP MR.Cache.psm1-help.xml
 function Get-MRCacheStats {
     [CmdletBinding()]
     param(
