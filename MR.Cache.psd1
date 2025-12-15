@@ -1,5 +1,5 @@
 @{
-    RootModule        = 'MRCache.psm1'
+    RootModule        = 'MR.Cache.psm1'
     ModuleVersion     = '1.0.0'
     CompatiblePSEditions = @('Desktop', 'Core')
     GUID              = 'b4a6a9e1-6c0b-4ab2-9d8e-f2157c023999'
@@ -7,7 +7,7 @@
     CompanyName       = 'Community'
     Copyright         = '(c) 2025 m-reisner'
     Description       = 'ScriptBlock-basierter Cache mit TTL, Statistiken und Hash-Indexierung für PowerShell.'
-    PowerShellVersion = '5.1'
+    PowerShellVersion = '7'
 
     FunctionsToExport = @(
         'Use-MRCache',
@@ -22,7 +22,7 @@
     PrivateData       = @{
         PSData = @{
             Tags        = @('cache', 'performance', 'development', 'scriptblock')
-            ProjectUri  = 'https://github.com/m-reisner/MRCache'
+            ProjectUri  = 'https://github.com/m-reisner/MR.Cache'
             LicenseUri  = 'https://opensource.org/licenses/MIT'
             ReleaseNotes = 'Initial release 1.0.0'
         }

@@ -1,4 +1,3 @@
-Clear-Host
 #requires -Version 5.1
 
 $script:MRCacheIndexFileName = 'mrcache.xml'
@@ -393,6 +392,7 @@ oder aus dem Cache.
 Autor: m-reisner
 Modul: MRCache
 #>
+
 function Use-MRCache {
     [CmdletBinding()]
     param(
@@ -406,10 +406,14 @@ function Use-MRCache {
         [string]$CachePath,
 
         [Parameter()]
-        [switch]$ForceRefresh
+        [switch]$ForceRefresh,
+
+        # NEU: optionale ID, z.B. ComputerName, UserName, Kombination etc.
+        [Parameter()]
+        [object]$CacheId
     )
 
-    Write-Verbose "Use-MRCache aufgerufen. TTL='$Ttl', ForceRefresh=$ForceRefresh"
+    Write-Verbose "Use-MRCache aufgerufen. TTL='$Ttl', ForceRefresh=$ForceRefresh, CacheId vorhanden: $($PSBoundParameters.ContainsKey('CacheId'))"
 
     # Cache-Pfad vorbereiten (basierend auf aufrufendem Script oder Konsole)
     $CachePathResolved = Get-MRCachePath -CachePath $CachePath
@@ -423,9 +427,25 @@ function Use-MRCache {
     $index = Get-MRCacheIndex -CachePath $CachePathResolved
     Clear-MRCacheExpired -Index $index -CachePath $CachePathResolved
 
-    # Hash für den Scriptblock berechnen
+    # Hash für den Scriptblock + optional CacheId berechnen
     $scriptText = $ScriptBlock.ToString()
-    $hash = Get-MRCacheHash -ScriptText $scriptText
+    $baseHash   = Get-MRCacheHash -ScriptText $scriptText
+
+    if ($PSBoundParameters.ContainsKey('CacheId')) {
+        try {
+            $idString = $CacheId | ConvertTo-Json -Depth 5 -Compress
+        } catch {
+            $idString = [string]$CacheId
+        }
+
+        $hashInput = "$baseHash|$idString"
+        $hash      = Get-MRCacheHash -ScriptText $hashInput
+
+        Write-Verbose "Verwende CacheId. Basis-Hash: $baseHash, CacheId-String: $idString, kombinierter Hash: $hash"
+    } else {
+        $hash = $baseHash
+        Write-Verbose "Keine CacheId angegeben. Verwende reinen ScriptBlock-Hash: $hash"
+    }
 
     $cacheFile = Join-Path -Path $CachePathResolved -ChildPath ("{0}.xml" -f $hash)
     $now       = Get-Date
@@ -478,7 +498,6 @@ function Use-MRCache {
             $hitCount++
             $totalSaved += $lastExecMs
 
-            # Felder sicherstellen
             if (-not ($entry.PSObject.Properties.Name -contains 'HitCount')) {
                 $entry | Add-Member -NotePropertyName 'HitCount' -NotePropertyValue $hitCount
             } else {
@@ -547,40 +566,6 @@ function Use-MRCache {
     return $result
 }
 
-<#
-Kurze Beschreibung
-
-Entfernt Cache-Dateien vollständig oder selektiv basierend auf einem Script.
-
-Ausführliche Beschreibung
-
-Clear-MRCache löscht Cache-Dateien aus dem .mrcache-Ordner.
-Es gibt zwei Modi:
-
--All
-Entfernt den gesamten Cache-Ordner des aufrufenden Scripts (oder des angegebenen Cache-Pfads).
-Danach wird der leere Ordner automatisch neu erstellt.
-
--ScriptPath
-Analysiert ein angegebenes PowerShell-Script, extrahiert alle darin enthaltenen Use-MRCache-Aufrufe, berechnet deren Hashes und löscht ausschließlich die zugehörigen Cache-Dateien.
-Der Cache anderer Scripts bleibt dabei unverändert.
-
-Der zugehörige Cache-Index wird entsprechend aktualisiert.
-
-Parameterbeschreibung
-
--All
-Löscht den vollständigen Cache für das aktuelle Script oder den angegebenen Cache-Pfad.
-
--ScriptPath
-Nur Cache-Einträge löschen, die im angegebenen Script durch Use-MRCache verwendet werden.
-
--CachePath (optional)
-Falls der Cache an einem benutzerdefinierten Ort liegt.
-
--Verbose
-Gibt detaillierte Auskunft über gelöschte Dateien und geänderte Index-Einträge.
-#>
 <#
 .SYNOPSIS
 Löscht Cache-Dateien vollständig oder selektiv.

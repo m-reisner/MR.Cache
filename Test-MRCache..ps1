@@ -4,7 +4,9 @@ $sw = [System.Diagnostics.Stopwatch]::StartNew()
 
 Import-Module './MRCache.psm1' -Force
 
-$computers = Use-MRCache -Verbose -ScriptBlock {
+for ($i = 1; $i -le 10; $i++) {
+
+$computers = Use-MRCache -CacheId  $i -Verbose -ScriptBlock {
     Get-ADComputer -Filter { (Operatingsystem -like "Windows 11*") -and (Enabled -eq $true) } -Properties Name,Operatingsystem,Enabled |
     Select-Object Name, Operatingsystem, Enabled |
     Where-Object {
@@ -17,7 +19,9 @@ $computers = Use-MRCache -Verbose -ScriptBlock {
         ($_.Name -notmatch "IKT")
     }
 }
-
+Write-Host "Iteration $i startet…" -ForegroundColor Cyan
+}
+sleep 3
 $computers | Format-Table
 
 $sw.Stop()
